@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BG Animation</title>
+<style>
+body
+{
+margin: 0;
+overflow: hidden;
+background-color: black;
+}
+canvas
+{
+display: block;
+}
+</style>
+</head>
+<body>
+<canvas id="myCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const flowers = [];
+const numFlowers = 100;
+const flowerSize = 10;
+const gravity = 0.05; 
+const maxVelocityY = 2; 
+
+class Flower
+{
+constructor(x, y, color)
+{
+this.x = x;
+this.y = y;
+this.color = color;
+this.velocity = { x: Math.random() - 
+0.5,y: Math.random()*-1 }; 
+this.angle = Math.random() * Math.PI * 2;
+this.rotationSpeed = Math.random() * 0.1 - 0.05;
+}
+
+update() 
+{
+this.velocity.y = Math.min(this.velocity.y + 
+gravity, maxVelocityY);
+this.x += this.velocity.x;
+this.y += this.velocity.y;
+this.angle += this.rotationSpeed;
+
+this.draw();
+}
+
+draw()
+{
+ctx.save();
+ctx.translate(this.x, this.y);
+ctx.rotate(this.angle);
+
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.arc(0, 0, flowerSize, 0, Math.PI * 2);
+ctx.fillStyle = this.color;
+ctx.fill();
+ctx.closePath();
+
+ctx.restore();
+}
+
+get isOutOfCanvas() 
+{
+return this.y - flowerSize > 
+canvas.height || this.x + flowerSize < 
+0 || this.x - flowerSize > canvas.width;
+}
+}
+
+function createFlowers() 
+{
+for (let i = 0; i < numFlowers; i++) 
+{
+const x = Math.random() * canvas.width;
+const y = Math.random() * -canvas.height;
+const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+flowers.push(new Flower(x, y, color));
+}
+}
+
+function animate() 
+{
+requestAnimationFrame(animate);
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+flowers.forEach((flower, index) => 
+{
+flower.update();
+if (flower.isOutOfCanvas) 
+{
+flowers.splice(index, 1);
+const x = Math.random() * canvas.width;
+const y = Math.random() * -canvas.height;
+const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+flowers.push(new Flower(x, y, color));
+}
+});
+}
+
+createFlowers();
+animate();
+
+window.addEventListener('resize', () => 
+{
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+flowers.length = 0;
+createFlowers();
+});
+</script>
+</body>
+</html>
